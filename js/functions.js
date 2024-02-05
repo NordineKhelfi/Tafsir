@@ -60,4 +60,14 @@ function lineClick(event) {
   let audioUrl = event.currentTarget.dataset.url;
   audio.setAttribute('src', audioUrl);
   audio.play();
+
+  if ('mediaSession' in navigator) {
+    let surahIndex = document.querySelector('select').value;
+    let surahName = document.querySelector(`option[value="${surahIndex}"]`).innerText;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: `Surah ${surahName}`,
+      artist: `Ali Al Houdhaify`
+    });
+  }
 }
