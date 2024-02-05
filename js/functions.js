@@ -6,29 +6,21 @@ const audio = document.querySelector('audio');
 export function displayVersesBySurahId(id, searchTerms = '') {
   resetUI();
   Promise.all([
-    fetch(`https://islamhouse.com/quran/french_mokhtasar/sura-${id}.html`).then(res => res.text()),
+    fetch(`https://quranenc.com/api/v1/translation/sura/french_mokhtasar/${id}`).then(res => res.json()),
     fetch(`https://api.alquran.cloud/v1/surah/${id}`).then(res => res.json()),
     fetch(`https://api.alquran.cloud/v1/surah/${id}/fr.hamidullah`).then(res => res.json())
-  ]).then(([tafsirText, arabicRes, frenchRes]) => {
+  ]).then(([tafsirRes, arabicRes, frenchRes]) => {
     loading.style.display = 'none';
     
     let arabicVerses = arabicRes.data.ayahs.map(ayah => ayah.text.replace('۞', ''));
     let verseNumbers = arabicRes.data.ayahs.map(ayah => ayah.number);
     let frenchVerses = frenchRes.data.ayahs.map(ayah => ayah.text);
 
-    let htmlContent = new DOMParser().parseFromString(tafsirText, 'text/html');
-
-    let title = htmlContent.querySelector('h1');
-    surahTitle.innerText = title.innerText.substring(0, title.innerText.length - 3);
-    
-    let verses = htmlContent.querySelectorAll('p');
-    verses = Array.from(verses, x => x.innerText);
-
-    verses = verses.map((verse, index) => `
+    let verses = tafsirRes.result.map(x => x.translation).map((verse, index) => `
       <div class="line" data-url="https://cdn.islamic.network/quran/audio/128/ar.hudhaify/${verseNumbers[index]}.mp3">
         <span class="verse-ar">۞ ${arabicVerses[index]}</span>
         <span class="verse-fr">${index + 1} - ${frenchVerses[index]}</span>
-        <p class="tafsir">${verse.substring(index < 99 ? 4 : 5)}</p>
+        <p class="tafsir">${verse}</p>
         <hr><br>
       </div>`);
 
